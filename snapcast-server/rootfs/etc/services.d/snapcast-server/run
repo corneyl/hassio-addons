@@ -22,33 +22,39 @@ bashio::log.debug "Config: $(bashio::addon.config)"
 
 echo "[stream]" > "${config}"
 for stream in $(bashio::config 'streams.streams'); do
-    echo "stream = ${stream}" >> "${config}"
+    echo "source = ${stream}" >> "${config}"
 done
+
+sampleformat=$(bashio::config 'sampleformat')
+# Add DLNA Media Renderer source
+{
+    echo "source = pipe:///share/snapfifo?&name=DLNA&disable_audio_cache=true&sampleformat=${sampleformat}"
+} >> "${config}"
 
 # Add the Spotify source
 device_name=$(bashio::config 'spotify_name')
 spotify_auth=""
-if bashio::config.has_value 'spotify_username'; then
-    bashio::config.require 'spotify_password'
+if bashio::config.has_value 'spotify_token'; then
 
-    username=$(bashio::config 'spotify_username')
-    password=$(bashio::config 'spotify_password')
-
-    spotify_auth="&username=${username}&password=${password}"
+    token=$(bashio::config 'spotify_token')
+    spotify_auth="&access_token=${token}"
 fi
 
 {
-    echo "stream = librespot:///usr/bin/librespot?name=Spotify&devicename=${device_name}${spotify_auth}&disable_audio_cache=true"
+    echo "source = librespot:///usr/bin/librespot?name=Spotify&devicename="${device_name}"${spotify_auth}&disable_audio_cache=true&cache=/data/spot"
     echo "buffer = $(bashio::config 'buffer')"
     echo "codec = $(bashio::config 'codec')"
     echo "send_to_muted = $(bashio::config 'send_to_muted')"
     echo "sampleformat = $(bashio::config 'sampleformat')"
+    echo "chunk_ms = $(bashio::config 'chunk_ms')"
     echo "[http]"
-    echo "doc_root = /usr/share/snapserver/snapweb"
+    echo "doc_root = /usr/share/snapweb"
 } >> "${config}"
 
+bashio::log.debug "SnapServer Config: $(cat ${config})"
+
 # Configure snapweb
-cat <<EOT > /usr/share/snapserver/snapweb/config.js
+cat <<EOT > /usr/share/snapweb/config.js
 "use strict";
 let config = {
     baseUrl: (window.location.protocol === 'https:' ? 'wss://' : 'ws://') + window.location.host + window.location.pathname.replace(/\/$/, '')

@@ -1,42 +1,89 @@
 # https://developers.home-assistant.io/docs/add-ons/configuration#add-on-dockerfile
-ARG BUILD_FROM=ghcr.io/hassio-addons/base:13.0.0
+ARG BUILD_FROM=ghcr.io/hassio-addons/base:16.3.4
 FROM $BUILD_FROM
 
 # See https://github.com/librespot-org/librespot/wiki/Compiling#addition-features for librespot compile features.
 RUN \
 	apk add --no-cache --virtual .build-dependencies \
-        build-base=0.5-r3 \
-        cargo=1.64.0-r2 \
-        git=2.38.3-r1 \
-        protobuf-dev=3.21.9-r0 \
-        pulseaudio-dev=16.1-r6 \
-        avahi-dev=0.8-r6 \
-    \
-    && apk add --no-cache \
-        dbus=1.14.4-r0 \
-        nss=3.85-r0 \
-        avahi-compat-libdns_sd=0.8-r6 \
-        avahi=0.8-r6 \
-        pulseaudio=16.1-r6 \
-        alsa-plugins-pulse=1.2.7.1-r0 \
-		snapcast=0.26.0-r3 \
-    \
-    && cargo install \
-        --locked \
-        --no-default-features \
-        --features with-dns-sd \
-        --root /usr \
-        --bin librespot \
-        --version 0.4.2 \
-        --verbose \
-        -- librespot \
-    \
-    && apk del --no-cache --purge .build-dependencies \
-    && rm -fr \
-        /tmp/* \
-        ~/.cargo \
-        /usr/.crates.toml \
-        /usr/.crates2.json
+        build-base \
+        cargo \
+        git \
+        protobuf-dev \
+        pulseaudio-dev \
+        avahi-dev \
+        autoconf \
+        automake \
+        libtool \
+        pkgconf \  
+        gcc \
+        g++ \
+        make \
+        cmake
+        #rust-bindgen
+RUN \
+	apk add --no-cache \
+        dbus \
+        nss \
+        avahi-compat-libdns_sd \
+        avahi \
+        pulseaudio \
+        alsa-plugins-pulse \
+	    snapcast \
+        alsa-utils \
+        alsa-utils-doc \
+        alsa-lib \
+        alsaconf \
+        alsa-ucm-conf \
+        libupnp-dev \
+        libnice-gstreamer \
+        gst-plugins-base \
+        gst-plugins-ugly \
+        gst-plugins-good \
+        gst-plugins-bad \
+        gst-plugins-good-gtk \
+        gst-libav \
+        gstreamer-dev \
+        gstreamer-tools
+
+        # RUN \
+# 	cargo install \
+#         --locked \
+#         --no-default-features \
+#         --features with-dns-sd \
+#         --root /usr \
+#         --bin librespot \
+#         --version 0.6.0 \
+#         --verbose \
+#         -- librespot
+
+RUN apk add --no-cache librespot --repository=https://dl-cdn.alpinelinux.org/alpine/edge/testing
+RUN apk add --no-cache snapweb --repository=https://dl-cdn.alpinelinux.org/alpine/edge/testing
+
+RUN \
+        addgroup root audio
+RUN \
+	git clone https://github.com/hzeller/gmrender-resurrect.git \
+	&& mkdir -p /gmrender-resurrect \
+	&& cd /gmrender-resurrect \
+	&& ./autogen.sh \
+	&& ./configure \
+	&& automake \
+	&& make \
+	&& make install
+RUN \
+	apk del --no-cache --purge .build-dependencies \
+	&& rm -fr \
+		/tmp/* \
+		~/.cargo \
+	        /usr/.crates.toml \
+	        /usr/.crates2.json \
+                /gmrender-resurrect
+RUN \
+        mkdir -p /var/run/dbus
+        # && touch /var/run/dbus/system_bus_socket
+
+# https://stackoverflow.com/a/75295879 dbus daemon slow start fix
+RUN sed -i 's/ systemd//g' /etc/nsswitch.conf
 
 # Copy root filesystem
 COPY rootfs /
@@ -57,11 +104,11 @@ LABEL \
     io.hass.arch="${BUILD_ARCH}" \
     io.hass.type="addon" \
     io.hass.version=${BUILD_VERSION} \
-    maintainer="corneyl" \
+    maintainer="DjFabFab" \
     org.opencontainers.image.title="${BUILD_NAME}" \
     org.opencontainers.image.description="${BUILD_DESCRIPTION}" \
-    org.opencontainers.image.vendor="Corneyl's addons" \
-    org.opencontainers.image.authors="corneyl" \
+    org.opencontainers.image.vendor="DjFabFab's addons" \
+    org.opencontainers.image.authors="DjFabFab" \
     org.opencontainers.image.licenses="MIT" \
     org.opencontainers.image.url="https://github.com/${BUILD_REPOSITORY}" \
     org.opencontainers.image.source="https://github.com/${BUILD_REPOSITORY}" \

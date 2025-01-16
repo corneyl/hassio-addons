@@ -6,4 +6,7 @@
 
 bashio::log.info "Starting dbus-daemon..."
 
+# https://gitlab.freedesktop.org/dbus/dbus/-/issues/441#note_1721753
+ulimit -n 1024
+
 exec dbus-daemon --system --nofork

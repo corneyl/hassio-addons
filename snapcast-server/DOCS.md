@@ -1,6 +1,6 @@
 # Home Assistant Snapcast-server Add-on
 
-This add-on provides a Snapcast-server with support for Spotify connect.
+This add-on provides a Snapcast-server with support for Spotify connect and DLNA Media Renderer via [gmrender-resurrect](https://github.com/hzeller/gmrender-resurrect). \
 If the add-on doesn't show up in Spotify, try providing the Spotify username/password to connect the add-on to your account.
 
 ## How to use

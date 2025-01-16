@@ -1,12 +1,12 @@
 # https://developers.home-assistant.io/docs/add-ons/configuration#add-on-dockerfile
 build_from:
-  aarch64: ghcr.io/hassio-addons/base:13.0.0
-  amd64: ghcr.io/hassio-addons/base:13.0.0
-  armhf: ghcr.io/hassio-addons/base:13.0.0
-  armv7: ghcr.io/hassio-addons/base:13.0.0
-  i386: ghcr.io/hassio-addons/base:13.0.0
+  aarch64: ghcr.io/hassio-addons/base:16.3.4
+  amd64: ghcr.io/hassio-addons/base:16.3.4
+  # armhf: ghcr.io/hassio-addons/base:16.3.4
+  # armv7: ghcr.io/hassio-addons/base:16.3.4
+  # i386: ghcr.io/hassio-addons/base:16.3.4
 labels:
   org.opencontainers.image.title: "Snapcast-server add-on"
   org.opencontainers.image.description: "Snapcast server Add-on with Spotify connect support."
-  org.opencontainers.image.source: "https://github.com/corneyl/hassio-addons"
+  org.opencontainers.image.source: "https://github.com/DjFabFab/hassio-snapcast"
   org.opencontainers.image.licenses: "Apache License 2.0"

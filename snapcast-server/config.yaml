@@ -1,9 +1,9 @@
 # https://developers.home-assistant.io/docs/add-ons/configuration#add-on-config
 name: Snapcast server
-version: "0.2.1"
+version: "0.4.3"
 slug: snapcast-server
-description: Snapcast server with Spotify connect support
-url: "https://github.com/corneyl/hassio-addons/tree/main/snapcast-server"
+description: Snapcast server with Spotify connect and DLNA Renderer support
+url: "https://github.com/DjFabFab/hassio-snapcast/tree/main/snapcast-server"
 audio: true
 host_network: true
 ingress: true
@@ -13,28 +13,34 @@ privileged:
   - SYS_ADMIN
 init: false
 arch:
-  - armhf
-  - armv7
+  # - armhf
+  # - armv7
   - aarch64
   - amd64
-  - i386
+  # - i386
 map:
   - share:rw
 ports:
   1704/tcp: 1704
   1705/tcp: 1705
   1780/tcp: 1780
+  50000/tcp: 50000
+  8200/tcp: 8200
 ports_description:
   1704/tcp: Snapcast client connections
   1705/tcp: Snapcast's control interface
   1780/tcp: Snapcast websocket connections and web-interface
+  8200/tcp: DLNA Discovery
+  50000/tcp: DLNA Renderer
 options:
   streams:
     streams: []
   buffer: 1000
+  chunk_ms: 20
   codec: flac
   send_to_muted: false
-  sampleformat: "48000:16:2"
+  sampleformat: "44100:16:2"
+  renderer_name: "Home Assistant DLNA Renderer"
   spotify_name: "Home Assistant Sound System"
   log_level: info
 schema:
@@ -42,11 +48,12 @@ schema:
   streams:
     streams: ["str"]
   buffer: int
+  chunk_ms: int
   codec: list(pcm|flac|vorbis|opus)
+  renderer_name: str
   send_to_muted: bool
   sampleformat: str
   spotify_name: str
-  spotify_username: str?
-  spotify_password: password?
+  spotify_token: password?
   log_level: list(trace|debug|info|notice|warning|error|fatal)
-image: "ghcr.io/corneyl/{arch}-snapcast-server"
+image: "ghcr.io/djfabfab/{arch}-snapcast-server"
